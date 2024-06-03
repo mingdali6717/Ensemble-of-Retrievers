@@ -10,7 +10,14 @@ This is the official repository for our ACL 2024 (findings) paper [Unraveling an
 ## Installation
 
 ## Datasets
-
+Download the datasets NQ, TriviaQ, WebQ from this [url](https://drive.google.com/drive/folders/1lFFTklW_0HuR53hLpFdLClgfSAhXn_2f), then run the following code to process the data:
+```
+python data/datasets/process.py -d [path to the data jsonl file] -o [path to save the processed data]
+```
+to sample the 500 examples for gpt-3.5, run the following code:
+```
+python data/datasets/data_sampler.py -d [path to the processed data jsonl file] -o [path to save the sampled data]
+```
 ## Run EoR
 ### Generate Answers
 ### Evaluation
