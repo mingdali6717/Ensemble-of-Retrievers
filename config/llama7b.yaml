@@ -1,0 +1,543 @@
+# Project
+
+log_detail: False 
+max_knowledge_length: 1000 # max_length of the processed retrieved documents
+tokenizer:  #tokenization method used for knowledge maximum length truncation, should be one of empty(None), llama or nltk 
+
+seed: 42
+
+# Dataset or file
+# data: open_natural_question
+data: open_natural_question
+test_file: ./data/datasets/open_natural_question/10_example.jsonl # path to the dataset
+
+
+cache_dir: #./output/cached_result/{data}/nq-test-llama-13b # path cached the intermediate results
+cache_parameter_dir: ./output/parameter_setting/nq-llama-13b.txt # path cached the optimal weights
+ignore_method_weight: 0.1
+
+# Output dir. Output will be saved into "output_dir/%Y_%m_%d_%H_%M_%S/{rank}"
+output_dir: ./output/
+
+# Result will be saved in output_dir/result_{info_}_file/
+result_file: result.json
+result_info_file: result_info.json
+
+run_evaluation: True # if true, will directly evaluate the answers after generation
+cached_score_path:  # path cached the result of previous results evaluation
+
+# gpu id list. If set None, will use gpu in [0, torch.cuda.device_count() - 1]
+gpu: 
+
+ControllerConfig:
+# set the default modules
+  Web:
+  Wiki:
+  Gendoc: #GendocLlama13b # change the name to another one in ModuleConfig wii change the base config for gendoc module
+  Contriever:
+  Summarizer: #SummarizerLlama13b # change the name to another one in ModuleConfig wii change the base config for gendoc module
+
+
+GeneratorConfig:
+  turn_on: True
+  module: #GeneratorLlama13b 
+  without_retrieval: False #if True, directly generate with query without retrieval
+  dynamic_retrieval: True #if True, "query without knowledge" will participate in generation, voting and scoring,
+
+EvaluatorConfig:
+  VoterModule:
+    turn_on: True
+    module:
+  ScorerModule:
+    turn_on: False
+    module:
+
+ControlConfig:
+  
+  wiki:
+    method_name: wiki
+    turn_on: True # if False, this processing method will be turned off.
+    summarize: True # if True, the corresponding processd documents will be summarized the summarization module.
+    keep_both: True # if True, the both docs before and after summarization will be kept for further generation.
+    Modules:
+      retriever:
+      contriever:
+      summarizer:
+    help: "append 10 best wiki paragraph"
+  gendoc:
+    method_name: gendoc
+    turn_on: True
+    summarize: False
+    keep_both: False
+    Modules:
+      retriever: 
+      contriever:
+      summarizer:
+    help: "generate doc with module Gendoc"
+  gc:
+    method_name: google_contrieve
+    turn_on: True
+    summarize: True
+    keep_both: True
+    Modules:
+      retriever:
+      contriever: 
+      summarizer:
+    help: "split google docs into paragraphs with 100 words each, then use contriever to select the best 10."
+  gg:
+    method_name: google_best
+    turn_on: True
+    summarize: True
+    keep_both: True
+    Modules:
+      retriever: 
+      contriever:
+      summarizer:
+    help: "select the best google doc"
+  gm:
+    method_name: google_merge
+    turn_on: True
+    summarize: True
+    keep_both: True
+    Modules:
+      retriever:
+      contriever:
+      summarizer:
+    help: "simply truncate the top-4 google docs into 250 words then concatenate them"
+  gm_w:
+    method_name: google_merge+wiki
+    turn_on: True
+    summarize: True
+    keep_both: True
+    Modules:
+      retriever:
+      contriever:
+      summarizer:
+    help: "concate the top 2 from google merged and top 5 from wiki"
+  gc_w:
+    method_name: google_contrieve+wiki
+    turn_on: True
+    summarize: True
+    keep_both: True
+    Modules:
+      retriever:
+      contriever:
+      summarizer:
+    help: "concate the top 5 from google contrieved and top 5 from wiki"
+  c_all: 
+    method_name: contrieve_all_sources
+    turn_on: True
+    summarize: True
+    keep_both: True
+    Modules:
+      retriever:
+      contriever:
+      summarizer:
+    help: "concate all retrieved sources then contrieve"
+
+
+
+# LLM Config
+LLMConfig:
+  llm1:
+    model_name: llama2_base_reward_model
+    model_path: ./data/model/llama2_base_reward_model/pytorch_model.bin
+    model_class: LlamaModel
+    fp16: True
+    tokenizer_class: LlamaTokenizer
+  llama-llm1:
+    model_name: llama2-chat-7b
+    model_path: daryl149/llama-2-7b-chat-hf
+    model_class: LlamaForCausalLM
+    fp16: False
+    tokenizer_class: LlamaTokenizer
+  llama-llm2:
+    model_name: llama2-chat-13b
+    model_path: meta-llama/Llama-2-13b-chat-hf
+    model_class: LlamaForCausalLM
+    fp16: True
+    tokenizer_class: LlamaTokenizer
+  baichuan-llm1:
+    model_name: baichuan-7b
+    model_path: baichuan-inc/Baichuan-7B
+    model_class: AutoTokenizer
+    fp16: False
+    tokenizer_class: AutoModelForCausalLM
+  llm3:
+    model_name: xverse-chat
+    model_path: xverse/XVERSE-13B-Chat
+    model_class: LlamaForCausalLM
+    fp16: True
+    tokenizer_class: LlamaTokenizer
+  llm5:
+    model_name: en_query_encoder
+    model_path: ./data/model/webglm_dual_encoder/query_encoder
+    model_class: AutoModel
+    fp16: False
+    tokenizer_path: facebook/contriever-msmarco
+    tokenizer_class: AutoTokenizer
+  llm6:
+    model_name: en_paragraph_encoder
+    model_path: ./data/model/webglm_dual_encoder/paragraph_encoder
+    model_class: AutoModel
+    fp16: False
+    tokenizer_path: facebook/contriever-msmarco
+    tokenizer_class: AutoTokenizer
+  llm7:
+    model_name: zh_encoder
+    model_path: BAAI/bge-large-zh
+    model_class: AutoModel
+    fp16: False
+    tokenizer_class: AutoTokenizer
+  llm9:
+    model_name: deberta
+    model_path: microsoft/deberta-xlarge-mnli
+    model_class: AutoModel
+    fp16: False
+    tokenizer_class: AutoTokenizer
+  nli_model:
+    model_name: deberta_nli
+    model_path: microsoft/deberta-xlarge-mnli
+    model_class: AutoModelForSequenceClassification
+    fp16: False
+    tokenizer_class: AutoTokenizer
+  gpt-3.5-turbo:
+    model_name: gpt-3.5-turbo
+  gpt-3.5-turbo-instruct:
+    model_name: gpt-3.5-turbo-instruct
+
+# Will initial and release after usage. 
+LLMMap: 
+  gpu0: 
+
+
+
+
+# ModuleConfig, we can DIY any module configs and change the name in the ControllerConfig and GeneratorConfig to change the corresponding module config.
+ModuleConfig:
+  Web: #default module for web retrieveal, DO NOT change the module name
+    type: Web
+    verbose: True
+    load_result_file: #web_doc.json
+    save_result_file: web_doc.json
+    load_info_file: #web_info.json
+    save_info_file: web_info.json
+    log_detail: False
+    ssl_verify: False
+    min_doc_len: 50
+    max_doc_len: 2000
+
+
+  Wiki: #default module for wiki retrieval, DO NOT change the module name
+    type: Wiki
+    verbose: True
+    load_result_file: 
+    save_result_file: wiki_doc.json
+    load_info_file: 
+    save_info_file: wiki_info.json
+    log_detail: True
+    tokenize_kwargs:
+      padding: "longest"
+      truncation: False
+      max_length: 128
+    encode_kwargs:
+      batch_size: 1024
+      pooling_method: cls
+
+
+  Gendoc: #default module for gendoc, DO NOT change the module name
+    type: Gendoc
+    verbose: True
+    load_result_file: 
+    save_result_file: gen_doc.json
+    load_info_file: 
+    save_info_file: gendoc_info.json
+    log_detail: False
+    zh_model_name: chatglm2
+    zh_template_id: 1
+    en_model_name: llama2-chat-7b
+    en_template_id: 1
+    tokenize_kwargs:
+      padding: "longest"
+      truncation: True
+      padding_side: left
+    generate_kwargs:
+      batch_size: 5
+      temperature: 0.7
+      top_p: 0.8
+      top_k: 50
+      repetition_penalty: 
+      do_sample: False
+  
+  GendocLlama13b: 
+    type: Gendoc
+    verbose: True
+    load_result_file: 
+    save_result_file: gen_doc.json
+    load_info_file: 
+    save_info_file: gendoc_info.json
+    log_detail: False
+    zh_model_name: chatglm2
+    zh_template_id: 1
+    en_model_name: llama2-chat-13b
+    en_template_id: 1
+    tokenize_kwargs:
+      padding: "longest"
+      truncation: True
+      padding_side: left
+    generate_kwargs:
+      batch_size: 2
+      temperature: 0.7
+      top_p: 0.8
+      top_k: 50
+      repetition_penalty: 
+      do_sample: 
+  
+  GendocTurbo: 
+    type: Gendoc
+    verbose: True
+    load_result_file: gen_doc.json
+    save_result_file: gen_doc.json
+    load_info_file: gendoc_info.json
+    save_info_file: gendoc_info.json
+    zh_model_name: chatglm2
+    zh_template_id: 1
+    en_model_name: gpt-3.5-turbo-instruct
+    en_template_id: 1
+    generate_kwargs:
+      batch_size: 20
+      top_p: 0.8
+      max_new_tokens: 1000
+      wait_time: 19
+
+  Summarizer: #default module for summarization, DO NOT change the module name
+    type: Summarizer
+    verbose: True
+    load_result_file: 
+    save_result_file: summarize_result.json
+    load_info_file: 
+    save_info_file: summarize_info.json
+    zh_model_name: chatglm2
+    zh_template_id: 1
+    en_model_name: llama2-chat-7b
+    en_template_id: 1
+    tokenize_kwargs:
+      padding: longest
+      truncation: True
+      padding_side: left
+    generate_kwargs:
+      batch_size: 5
+      temperature: 0.8
+      top_p: 0.9
+      top_k: 50
+      repetition_penalty: 1
+      do_sample: False
+  
+  SummarizerLlama13b:
+    type: Summarizer
+    verbose: True
+    load_result_file: 
+    save_result_file: summarize_result.json
+    load_info_file: 
+    save_info_file: summarize_info.json
+    zh_model_name: chatglm2
+    zh_template_id: 1
+    en_model_name: llama2-chat-13b
+    en_template_id: 1
+    tokenize_kwargs:
+      padding: longest
+      truncation: True
+      padding_side: left
+    generate_kwargs:
+      batch_size: 2
+      temperature: 0.8
+      top_p: 0.9
+      top_k: 50
+      repetition_penalty: 1
+      do_sample: False
+  
+  SummarizerTurbo: 
+    type: Summarizer
+    verbose: True
+    load_result_file: summarize_result.json
+    save_result_file: summarize_result.json
+    load_info_file: summarize_info.json
+    save_info_file: summarize_info.json
+    zh_model_name: chatglm2
+    zh_template_id: 1
+    en_model_name: gpt-3.5-turbo-instruct
+    en_template_id: 1
+    generate_kwargs:
+      batch_size: 20
+      top_p: 0.8
+      wait_time: 19
+
+
+  Contriever: #default module for contriever, DO NOT change the module name
+    type: Contriever
+    verbose: True
+    load_result_file: 
+    save_result_file: contrive_result.json
+    load_info_file: 
+    save_info_file: contrive_info.json
+    min_knowledge_len: 300
+    en_query_model_name: en_query_encoder
+    en_paragraph_model_name: en_paragraph_encoder
+    zh_query_model_name: zh_encoder
+    zh_paragraph_model_name: zh_encoder
+    tokenize_kwargs:
+      padding: longest
+      truncation: True
+      max_length: 512
+    encode_kwargs:
+      batch_size: 512
+      pooling_method: mean
+
+
+
+
+  Generator: #default module for generation, DO NOT change the module name
+    type: Generator
+    verbose: True
+    load_result_file: 
+    save_result_file: response_result.json
+    load_info_file: 
+    save_info_file: response_info.json
+    zh_model_name: xverse-chat
+    zh_template_id: 2
+    zh_query_only_template_id: 1
+    en_model_name: llama2-chat-7b
+    en_template_id: 1
+    en_query_only_template_id: 2
+    system_id: 
+    tokenize_kwargs:
+      padding: longest
+      truncation: True
+      padding_side: left
+      truncation_side: left
+    generate_kwargs:
+      batch_size: 5 #per device batch size
+      temperature: 0.8
+      top_p: 0.9
+      top_k: 50
+      do_sample: False
+      max_new_tokens: 150
+      num_responses_per_prompt: 1
+  
+  GeneratorLlama13b: 
+    type: Generator
+    verbose: True
+    load_result_file: 
+    save_result_file: response_result.json
+    load_info_file: 
+    save_info_file: response_info.json
+    zh_model_name: xverse-chat
+    zh_template_id: 2
+    zh_query_only_template_id: 1
+    en_model_name: llama2-chat-13b
+    en_template_id: 1
+    en_query_only_template_id: 2
+    system_id: 
+    tokenize_kwargs:
+      padding: longest
+      truncation: True
+      padding_side: left
+      truncation_side: left
+    generate_kwargs:
+      batch_size: 2 #per device batch size
+      temperature: 0.8
+      top_p: 0.9
+      top_k: 50
+      do_sample: False
+      max_new_tokens: 150
+  
+  GeneratorTurbo: 
+    type: Generator
+    verbose: True
+    load_result_file: response_result.json
+    save_result_file: response_result.json
+    load_info_file: response_info.json
+    save_info_file: response_info.json
+    zh_model_name: xverse-chat
+    zh_template_id: 2
+    zh_query_only_template_id: 1
+    en_model_name: gpt-3.5-turbo-instruct
+    en_template_id: 3
+    en_query_only_template_id: 4
+    system_id: 
+    generate_kwargs:
+      batch_size: 20
+      temperature: 0.0
+      top_p: 0.9
+      max_new_tokens: 500
+      wait_time: 20
+
+  BaichuanGenerator: 
+      type: Generator
+      verbose: True
+      load_result_file: 
+      save_result_file: response_result.json
+      load_info_file: 
+      save_info_file: response_info.json
+      zh_model_name: xverse-chat
+      zh_template_id: 2
+      zh_query_only_template_id: 1
+      en_model_name: baichuan-7b
+      en_template_id: 1
+      en_query_only_template_id: 2
+      system_id: 
+      tokenize_kwargs:
+        padding: longest
+        truncation: True
+        padding_side: left
+        truncation_side: left
+      generate_kwargs:
+        batch_size: 3 #per device batch size
+        temperature: 0.8
+        top_p: 0.9
+        top_k: 50
+        do_sample: True
+        max_new_tokens: 150
+
+  Voter: #default module for voting, DO NOT change the module name
+    type: Voter
+    verbose: True
+    load_result_file: 
+    save_result_file: vote_result.json
+    load_info_file: 
+    save_info_file: vote_info.json
+    scoring_method: composition #one of nli, bertscore, rarebertscore, em, f1, nli_with_query or composition. Default is nli
+    bidirectional: # if True, will use (score(s_i, s_j) + score(s_j. s_i))/2 for similarity score, this is only applicable for asymmetric similarity score: [nli, nli_with_query, em] 
+      nli: True
+      nli_with_query: True
+      em: True
+    composition_weight: [0, 0, 0, 1, 1, 0] # if voting method is weight, final score with be the weighted sum, weight is given by the normlized composition weight. each number is the weight of "nli","bertscore","rarebertscore","em","f1","nli_with_query"
+    threshold: 0.0 # threshold to filter out answer, default is 0.5
+    pooling_method: mean # should be one of max, mean, topk, voting or majority voting, default is max
+    pooling_threshold: # threshold to filter out unsimilar answers in pooling methods
+    min_acceptance_num:  2 #when pooling_method is voting, only answer with more than 'min_accepatance_num' similar answers which similarity score > threshold will be kept. if None, min_acceptance_num will be set to math.ceil(num/2)
+    mean_pooling_topk: #if pooling method is topk, will only take the average of the top 'mean_pooling_topk' number of scores, default is math.ceil(num/2)
+    method_weight: True # if false, method weight will not be used
+    batch_size: 512
+    hierarchical_voting: 
+      turn_on: True # if True and 'num_responses_per_prompt' in response modules is bigger than 1, then voting module will firstly vote within each query_knowledge pair(because each query-knowledge pair have more than 1 responses), then voting within each query, if False, will directly vote within each query.
+      pooling_method: majority_voting
+      pooling_threshold: 
+      min_acceptance_num:  2
+      mean_pooling_topk:
+
+  Scorer: #default module for scoring, DO NOT change the module name
+    type: Scorer
+    load_result_file: 
+    save_result_file: score_result.json
+    load_info_file: 
+    save_info_file: score_info.json
+    zh_model_name: xverse_base_reward_model
+    zh_template_id: 1
+    en_model_name: llama2_base_reward_model
+    en_template_id: 1
+    tokenize_kwargs: 
+      padding: longest
+      truncation: False
+    reward_kwargs:
+      batch_size: 24

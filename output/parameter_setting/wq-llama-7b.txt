@@ -1,0 +1,1 @@
+nli: 0.15555 bertscore: 0.66793 em: 0.08401 nli/w/q: 0.31447 c_all: 0.56461 c_all_sum: 0.01289 gc: 0.04423 gc_sum: 0.04383 gc_w: 0.53137 gc_w_sum: 0.02503 gendoc: 0.14844 gg: 0.03111 gg_sum: 0.03559 gm: 0.47314 gm_sum: 0.02879 gm_w: 0.55173 gm_w_sum: 0.02438 query_only: 0.54012 wiki: 0.58767 wiki_sum: 0.15494
