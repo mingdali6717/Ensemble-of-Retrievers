@@ -33,16 +33,33 @@ This is the official repository for our ACL 2024 (findings) paper [Unraveling an
 
 **Other models and files needed:**
 
-  -	Wiki index files. After installing pyserini, using codes below to download.（About 50G.It is needed to proxy.Index files are saved in ~/.cache/pyserini/indexes）
+  -	Wiki index files. After installing pyserini, using codes below to download.（About 50G. please save the proxy.Index files in ~/.cache/pyserini/indexes）
     ```python
     from pyserini.search.faiss import FaissSearcher, DprQueryEncoder
     en_searcher = FaissSearcher.from_prebuilt_index('wikipedia-dpr-multi-bf', DprQueryEncoder('facebook/dpr-question_encoder-multiset-base'))
     ```
-  - Bem model(Used for evaluate).Save it in **data/model** director. [Download link](https://tfhub.dev/google/answer_equivalence/bem/1)
-  - webglm_dual_encoder(Used for wiki search and rerank). From [WebGLM](https://github.com/THUDM/WebGLM), Here's the [download link](https://cloud.tsinghua.edu.cn/d/bc96946dd9a14c84b8d4/)
-
+  - Bem model (Used for evaluation). Please download the model from [Download link](https://tfhub.dev/google/answer_equivalence/bem/1) then save it in **data/model/** directory (or change the default cache path **CACHED_BEM_PATH** in eor/evaluation/\__init__.py line 40). 
+  - webglm_dual_encoder (Used for reranking in Contriever Module, from [WebGLM](https://github.com/THUDM/WebGLM). Here's the [download link](https://cloud.tsinghua.edu.cn/d/bc96946dd9a14c84b8d4/). Then please change the corresponding model_path in the config file to your cached path as follows:
+    ```bash
+    yaml Config file
+     └───LLMConfig
+         └───llm5
+             │───model_name: en_paragraph_encoder
+             │───model_path: **change to your cached path here**
+    ```
+- Other models needed can be downloaded directly from huggingface. you can add or replace any model by modifying the config file as follows:
+  - step 1, modify LLMConfig to add a now model to the framework
+    ```bash
+    yaml Config file
+     └───LLMConfig
+         └───[anything is ok, not important]
+             │───model_name: [the name to represent this model]
+             │───model_path: [path used for loading model by .from_pretrained in huggingface]
+             │───model_class: [the class before .from_pretrained in huggingface]
+            
+    ```
   - Reward Model.Training daryl149/llama-2-7b-chat-hf with openai/webgpt_comparisons and DeepSpeed-Chat Framwork.[Raw training code link](https://github.com/microsoft/DeepSpeedExamples/tree/master/applications/DeepSpeed-Chat/training/step2_reward_model_finetuning) or use codes in our project（under **train_reward_model** directory）
-  - Other models needed you can download directly from huggingface or replace them with your own models.Details please refer to the LLMConfig in given config files.
+  
 
 
 
