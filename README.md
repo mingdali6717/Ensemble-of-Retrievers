@@ -1,5 +1,5 @@
 # Unraveling and Mitigating Retriever Inconsistencies in Retrieval-Augmented Large Language Model
-This is the official repository for our ACL 2024 (findings) paper [Unraveling and Mitigating Retriever Inconsistencies in Retrieval-Augmented Large Language Model](https://arxiv.org/abs/2405.20680). We propose Ensemble of Retrievers (EoR), a trainable generate-then-rerank framework that first generates answers from different retrievers and then select the best one out of them. Our experiments demonstrate that EoR can adaptively retrieve from different knowledge sources and boost the performance of Retrieval-Augmented Language Models.
+This is the official repository for our ACL 2024 (findings) paper [Unraveling and Mitigating Retriever Inconsistencies in Retrieval-Augmented Large Language Model](https://arxiv.org/abs/2405.20680). We propose Ensemble of Retrievers (EoR), a trainable generate-then-rerank framework that first generates answers from different retrievers (we implement 16 different retrievers including retreival-free) and then select the best one out of them. Our experiments demonstrate that EoR can adaptively retrieve from different knowledge sources and boost the performance of Retrieval-Augmented Language Models.
 
 Our framework is composed of three parts: **Controller**, **Generator** and **Evaluator**. The Controller takes the responsibility to retrieve and process differet knowledge (i.e. implementing different retrievers) and the Generator generate responses for each retriever. Then the Evaluator evaluate all responses and select the best one as the final answer. 
 
@@ -52,7 +52,7 @@ Please note that the Web module conducts on-time search-engine retrieval. Hence 
     from pyserini.search.faiss import FaissSearcher, DprQueryEncoder
     en_searcher = FaissSearcher.from_prebuilt_index('wikipedia-dpr-multi-bf', DprQueryEncoder('facebook/dpr-question_encoder-multiset-base'))
     ```
-  - Bem model (Used for evaluation). Please download the model from [Download link](https://tfhub.dev/google/answer_equivalence/bem/1) then save it in **data/model/** directory (or change the default cache path **CACHED_BEM_PATH** in eor/evaluation/\__init__.py line 40). 
+  - Bem model (Used for evaluation). Please download the model from [Download link](https://tfhub.dev/google/answer_equivalence/bem/1) then save it in **data/model/** directory (or change the default cache path **CACHED_BEM_PATH** in [eor/evaluation/\__init__.py](https://github.com/mingdali6717/Ensemble-of-Retrievers/blob/master/eor/evaluation/__init__.py) line 40). 
   - webglm_dual_encoder (Used for reranking in Contriever Module, from [WebGLM](https://github.com/THUDM/WebGLM). Here's the [download link](https://cloud.tsinghua.edu.cn/d/bc96946dd9a14c84b8d4/). Then please change the corresponding model_path in the config file to your cached path as follows:
     ```bash
     yaml Config file
@@ -125,7 +125,7 @@ for quick search, please cache all intermediate results of each module when gene
 python run_search_weight.py -c [path of config file] -d [name of dataset to evaluate] -m [model name] -r [path of cached result dir] -t [path of saved query for train data]  -cn [file name of the cached controller result file] --test_path [path of saved query for test data] --test_cached_path [path of cached test result dir] -o [path to save parameter search result] 
 ```
 ## Other
-- We use [serper api](https://serper.dev/) for web search engine.If use web search module,please change the serper api-key of your own in line12 of [eor/retrieval/web/search.py](https://github.com/mingdali6717/Ensemble-of-Retrievers/blob/master/eor/retrieval/web/search.py)
+- We use [serper api](https://serper.dev/) for web search engine. If you want to use web search module, please change the serper api-key to your own in [eor/retrieval/web/search.py](https://github.com/mingdali6717/Ensemble-of-Retrievers/blob/master/eor/retrieval/web/search.py) line 12
 - You can write or modify config file according to your need in yaml file in **Config** director, please refer to our given example.
 
 
