@@ -125,8 +125,9 @@ for quick search, please cache all intermediate results of each module when gene
 python run_search_weight.py -c [path of config file] -d [name of dataset to evaluate] -m [model name] -r [path of cached result dir] -t [path of saved query for train data]  -cn [file name of the cached controller result file] --test_path [path of saved query for test data] --test_cached_path [path of cached test result dir] -o [path to save parameter search result] 
 ```
 ## Other
-- We use [serper api](https://serper.dev/) for web search engine. If you want to use web search module, please change the serper api-key to your own in [eor/retrieval/web/search.py](https://github.com/mingdali6717/Ensemble-of-Retrievers/blob/master/eor/retrieval/web/search.py) line 12
-- You can write or modify config file according to your need in yaml file in **Config** director, please refer to our given example.
+- We use [serper api](https://serper.dev/) for web search engine. If you want to use web search module, please change the serper api-key to your own in [eor/retrieval/web/search.py](https://github.com/mingdali6717/Ensemble-of-Retrievers/blob/master/eor/retrieval/web/search.py) line 12.
+- If you want to use OpenAI models, please add your OpenAI keys to [eor/utils/openai_tools.py](https://github.com/mingdali6717/Ensemble-of-Retrievers/blob/master/eor/utils/openai_tools.py) line 13 'API_KEYS'.
+- You can modify the config file according to your need in the yaml file in **Config** directory, please refer to our given example.
 
 
 
