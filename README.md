@@ -99,6 +99,13 @@ python data/datasets/data_sampler.py -d [path to the processed data jsonl file] 
 ## Config
 we use yaml config file to control the parameters in our framework. you can find them in 'config/'.\
 
+you can add or modify the module config under "ModuleConfig" to change the basic configuration for the seven basic modules
+
+'LLMconfig' controls the loading configurations for the models used in this framework.
+
+'ControlConfig' controls the configuration of different retrievers.
+
+'ControllerConfig','GeneratorConfig' and 'EvaluatorConfig' controlls what modules to be used.
 
 
 ## EoR
@@ -113,6 +120,7 @@ HF_DATASETS_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python run.py -c [path to the confi
 python run_evaluate.py -r [path to the result json file ] -o [path to save evaluation result] -n [dataset_name] -m [metrics to evaluate]
 ```
 ### Parameter Search
+for quick search, please cache all intermediate results of each module when generating answers. 
 ```
 python run_search_weight.py -c [path of config file] -d [name of dataset to evaluate] -m [model name] -r [path of cached result dir] -t [path of saved query for train data]  -cn [file name of the cached controller result file] --test_path [path of saved query for test data] --test_cached_path [path of cached test result dir] -o [path to save parameter search result] 
 ```
