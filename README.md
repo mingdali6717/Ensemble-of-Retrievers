@@ -1,13 +1,27 @@
 # Unraveling and Mitigating Retriever Inconsistencies in Retrieval-Augmented Large Language Model
-This is the official repository for our ACL 2024 (findings) paper [Unraveling and Mitigating Retriever Inconsistencies in Retrieval-Augmented Large Language Model](https://arxiv.org/abs/2405.20680).
+This is the official repository for our ACL 2024 (findings) paper [Unraveling and Mitigating Retriever Inconsistencies in Retrieval-Augmented Large Language Model](https://arxiv.org/abs/2405.20680). We propose Ensemble of Retrievers (EoR), a trainable generate-then-rerank framework that first generates answers from different retrievers and then select the best one out of them. Our experiments demonstrate that EoR can adaptively retrieve from different knowledge sources and boost the performance of Retrieval-Augmented Language Models.
+
+Our framework is composed of three parts: **Controller**, **Generator** and **Evaluator**. The Controller takes the responsibility to retrieve and process differet knowledge (i.e. implementing different retrievers) and the Generator generate responses for each retriever. Then the Evaluator evaluate all responses and select the best one as the final answer. 
+
+The **Controller** consists of five different modules, three for retrieving (**Web**, **Wiki**, **Gendoc**) and two for knowledge processing (**Contriever** and **Summarizer**). The **Evaluator** consisted of two different modules: **VoterModule** and **ScorerModule**.
+- **Web**: retrieve documents from the search engine. We use [serper api](https://serper.dev/) for web search engine.
+- **Wiki**: we retrieve documents from English Wikipedia dump from Dec. 20, 2018.
+- **Gendoc**: we follow the paper [Gendoc](https://arxiv.org/abs/2209.10063) to generate documents for LLM.
+- **Contriever**: chunk the documents and then use a dense retrieval model to reranking the chunks.
+- **Summarizer**: summarize the given documents by LLM.
+- **VoterModule**: score each response by comparing its similarity to other responses.
+- **ScorerModule**: score each response by a rewarding model. (deactivated in our paper for short-answer QA. but we find it effective for long-form QA)
+
+Please note that the Web module conducts on-time search-engine retrieval. Hence the results might be different from our own experiments presented in the paper. We will release our intermediate results in the future.
 
 
 
 # Experiments
 1. [Installation](#Installation)
 2. [Datasets](#Datasets)
-3. [Run EoR](#EoR)
-4. [Other](#Other)
+3. [Config](#Config)
+4. [Run EoR](#EoR)
+5. [Other](#Other)
 
 ## Installation
 1. Create python environment
@@ -48,17 +62,27 @@ This is the official repository for our ACL 2024 (findings) paper [Unraveling an
              │───model_path: **change to your cached path here**
     ```
 - Other models needed can be downloaded directly from huggingface. you can add or replace any model by modifying the config file as follows:
-  - step 1, modify LLMConfig to add a now model to the framework
+  - step 1, modify LLMConfig to add a new model to the framework
     ```bash
     yaml Config file
      └───LLMConfig
          └───[anything is ok, not important]
              │───model_name: [the name to represent this model]
-             │───model_path: [path used for loading model by .from_pretrained in huggingface]
-             │───model_class: [the class before .from_pretrained in huggingface]
-            
+             │───model_path: [path used for loading the model using .from_pretrained in huggingface]
+             │───model_class: [the model class used before .from_pretrained in huggingface, such as 'AutoModel']
+             │───fp16: [Whether use half precision]
+             │───tokenizer_path: [path used for loading the tokenizer using .from_pretrained in huggingface]
+             │───tokenizer_class: [tokenizer class used before .from_pretrained in huggingface]
     ```
-  - Reward Model.Training daryl149/llama-2-7b-chat-hf with openai/webgpt_comparisons and DeepSpeed-Chat Framwork.[Raw training code link](https://github.com/microsoft/DeepSpeedExamples/tree/master/applications/DeepSpeed-Chat/training/step2_reward_model_finetuning) or use codes in our project（under **train_reward_model** directory）
+  - step 2, change the model name in ModuleConfig to activate the model for the corresponding module.
+    ```bash
+    yaml Config file
+     └───ModuleConfig
+         └───[the module name you want to change the base model used]
+             │───en_model_name: [put the "model name" in LLMConfig here]
+             
+    ```
+- Reward Model. This framwork also supports to add an rewarding model to score each response after voting (not clearly illustrated in our papers). You can train your own rewarding model by  training daryl149/llama-2-7b-chat-hf with openai/webgpt_comparisons and DeepSpeed-Chat Framwork. [Raw training code link](https://github.com/microsoft/DeepSpeedExamples/tree/master/applications/DeepSpeed-Chat/training/step2_reward_model_finetuning) or use codes in our project（under **train_reward_model** directory）
   
 
 
@@ -72,6 +96,11 @@ to sample the 500 examples for gpt-3.5, run the following code:
 ```
 python data/datasets/data_sampler.py -d [path to the processed data jsonl file] -o [path to save the sampled data]
 ```
+## Config
+we use yaml config file to control the parameters in our framework. you can find them in 'config/'.\
+
+
+
 ## EoR
 ### Generate Answers
 ```
