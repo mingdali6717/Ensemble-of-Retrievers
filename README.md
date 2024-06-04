@@ -97,7 +97,7 @@ to sample the 500 examples for gpt-3.5, run the following code:
 python data/datasets/data_sampler.py -d [path to the processed data jsonl file] -o [path to save the sampled data]
 ```
 ## Config
-we use yaml config file to control the parameters in our framework. you can find them in 'config/'.\
+we use yaml config file to control the parameters in our framework. you can find them in 'config/'.
 
 you can add or modify the module config under "ModuleConfig" to change the basic configuration for the seven basic modules
 
