@@ -3,9 +3,7 @@ from typing import List
 
 import requests
 
-# SERPAPI_KEY = "b221e975b82bdeb07f3a81708227451a41c2ff296700648fcee86f0fae85644e"
-# SERPAPI_KEY = "e71bdb1b52b858a85a698003bae10266f769bcb37e2640d60c73d1b8eda7fdbb"
-SERPAPI_KEY = "4bfeb6d7403f6e50d878018b66054e79334622b37da7c76f36df29073396b134"
+SERPAPI_KEY = ""
 
 SERPER_URL = "https://google.serper.dev/search"
 SERPER_HEADERS = {

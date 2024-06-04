@@ -121,11 +121,13 @@ python run_evaluate.py -r [path to the result json file ] -o [path to save evalu
 ```
 ### Parameter Search
 for quick search, please cache all intermediate results of each module when generating answers. 
+
+Notebly, you can find a file named "controller_result.json" in your cached result directory which cached all processed documents. You can specify this file's name to skip all modules in the Controller.
 ```
 python run_search_weight.py -c [path of config file] -d [name of dataset to evaluate] -m [model name] -r [path of cached result dir] -t [path of saved query for train data]  -cn [file name of the cached controller result file] --test_path [path of saved query for test data] --test_cached_path [path of cached test result dir] -o [path to save parameter search result] 
 ```
 ## Other
-- We use [serper api](https://serper.dev/) for web search engine. If you want to use web search module, please change the serper api-key to your own in [eor/retrieval/web/search.py](https://github.com/mingdali6717/Ensemble-of-Retrievers/blob/master/eor/retrieval/web/search.py) line 12.
+- We use [serper api](https://serper.dev/) for web search engine. If you want to use web search module, please change the serper api-key to your own in [eor/retrieval/web/search.py](https://github.com/mingdali6717/Ensemble-of-Retrievers/blob/master/eor/retrieval/web/search.py) line 6.
 - If you want to use OpenAI models, please add your OpenAI keys to [eor/utils/openai_tools.py](https://github.com/mingdali6717/Ensemble-of-Retrievers/blob/master/eor/utils/openai_tools.py) line 13 'API_KEYS'.
 - You can modify the config file according to your need in the yaml file in **Config** directory, please refer to our given example.
 
